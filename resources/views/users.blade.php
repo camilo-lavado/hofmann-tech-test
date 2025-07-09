@@ -59,9 +59,14 @@
                     </div>
                     <div class="mb-3">
                         <label for="amount" class="form-label">Monto</label>
-                        <input type="number" class="form-control" name="amount" id="amount" required>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="text" class="form-control" name="amount" id="amount" required>
+                        </div>
                         <div class="text-danger small" id="error-amount"></div>
                     </div>
+
+
                     <div class="mb-3">
                         <label for="date" class="form-label">Fecha</label>
                         <input type="date" class="form-control" name="date" id="date" required>
@@ -85,7 +90,7 @@
             clearErrors();
             document.getElementById('id').value = user.id;
             document.getElementById('code').value = user.code;
-            document.getElementById('amount').value = user.amount;
+            document.getElementById('amount').value = Number(user.amount).toLocaleString('es-CL');
             document.getElementById('date').value = user.date.split('T')[0];
             modal.show();
         }
@@ -97,14 +102,20 @@
             });
         }
 
+        document.getElementById('amount').addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            this.value = Number(value).toLocaleString('es-CL');
+        });
+
         document.getElementById('editForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             clearErrors();
             const formData = new FormData(this);
+            const rawAmount = formData.get('amount').replace(/\./g, '').replace(/[^0-9]/g, '');
             const data = {
                 id: formData.get('id'),
                 code: formData.get('code'),
-                amount: formData.get('amount'),
+                amount: rawAmount,
                 date: new Date(formData.get('date')).toISOString()
             };
             const confirm = await Swal.fire({
