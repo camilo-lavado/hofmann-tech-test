@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Usuarios Hofmann</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-light p-4">
     <div class="container">
         <h1 class="mb-4">Usuarios (ListTableUsers)</h1>
@@ -21,18 +23,18 @@
             </thead>
             <tbody>
                 @foreach($users as $user)
-                    <tr>
-                        <td>{{ $user['id'] }}</td>
-                        <td>{{ $user['code'] }}</td>
-                        <td>${{ number_format($user['amount'], 0, ',', '.') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($user['date'])->format('d-m-Y') }}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary"
-                                    onclick="openModal({{ json_encode($user) }})">
-                                Editar
-                            </button>
-                        </td>
-                    </tr>
+                <tr>
+                    <td>{{ $user['id'] }}</td>
+                    <td>{{ $user['code'] }}</td>
+                    <td>${{ number_format($user['amount'], 0, ',', '.') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($user['date'])->format('d-m-Y') }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary"
+                            onclick="openModal({{ json_encode($user) }})">
+                            Editar
+                        </button>
+                    </td>
+                </tr>
                 @endforeach
             </tbody>
         </table>
@@ -52,7 +54,7 @@
                         <label for="code" class="form-label">Código</label>
                         <select class="form-select" name="code" id="code">
                             @foreach($codes as $c)
-                                <option value="{{ $c['code'] }}">{{ $c['code'] }} - {{ $c['name'] }}</option>
+                            <option value="{{ $c['code'] }}">{{ $c['code'] }} - {{ $c['name'] }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -75,6 +77,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let modal = new bootstrap.Modal(document.getElementById('editModal'));
 
@@ -86,7 +89,7 @@
             modal.show();
         }
 
-        document.getElementById('editForm').addEventListener('submit', async function (e) {
+        document.getElementById('editForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
@@ -97,19 +100,55 @@
                 date: new Date(formData.get('date')).toISOString()
             };
 
-            const response = await fetch('{{ route("send-user") }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
+            const confirm = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: '¿Deseas enviar los cambios?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, enviar',
+                cancelButtonText: 'Cancelar'
             });
 
-            const result = await response.json();
-            alert(result.status === 200 ? '¡Enviado correctamente!' : 'Error al enviar.');
-            modal.hide();
+            if (!confirm.isConfirmed) return;
+
+            Swal.fire({
+                title: 'Enviando...',
+                didOpen: () => Swal.showLoading(),
+                allowOutsideClick: false
+            });
+
+            try {
+                const response = await fetch('{{ route("send-user") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                Swal.fire({
+                    icon: result.status === 200 ? 'success' : 'error',
+                    title: result.status === 200 ? 'Actualizado' : 'Error',
+                    text: result.status === 200 ? 'Datos enviados correctamente.' : 'No se pudo enviar.'
+                });
+
+                if (result.status === 200) {
+                    modal.hide();
+                    setTimeout(() => window.location.reload(), 1000);
+                }
+
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error de red o del servidor.'
+                });
+            }
         });
     </script>
 </body>
+
 </html>
