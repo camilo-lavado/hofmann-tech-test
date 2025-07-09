@@ -9,8 +9,7 @@
 
 <body class="bg-light p-4">
     <div class="container">
-        <h1 class="mb-4">Usuarios (ListTableUsers)</h1>
-
+        <h1 class="mb-4">Usuarios</h1>
         <table class="table table-bordered table-hover align-middle">
             <thead class="table-dark">
                 <tr>
@@ -39,7 +38,6 @@
             </tbody>
         </table>
     </div>
-
     <!-- Modal -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -52,19 +50,22 @@
                     <input type="hidden" name="id" id="id">
                     <div class="mb-3">
                         <label for="code" class="form-label">Código</label>
-                        <select class="form-select" name="code" id="code">
+                        <select class="form-select" name="code" id="code" required>
                             @foreach($codes as $c)
                             <option value="{{ $c['code'] }}">{{ $c['code'] }} - {{ $c['name'] }}</option>
                             @endforeach
                         </select>
+                        <div class="text-danger small" id="error-code"></div>
                     </div>
                     <div class="mb-3">
                         <label for="amount" class="form-label">Monto</label>
                         <input type="number" class="form-control" name="amount" id="amount" required>
+                        <div class="text-danger small" id="error-amount"></div>
                     </div>
                     <div class="mb-3">
                         <label for="date" class="form-label">Fecha</label>
                         <input type="date" class="form-control" name="date" id="date" required>
+                        <div class="text-danger small" id="error-date"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -74,7 +75,6 @@
             </form>
         </div>
     </div>
-
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -82,6 +82,7 @@
         let modal = new bootstrap.Modal(document.getElementById('editModal'));
 
         function openModal(user) {
+            clearErrors();
             document.getElementById('id').value = user.id;
             document.getElementById('code').value = user.code;
             document.getElementById('amount').value = user.amount;
@@ -89,9 +90,16 @@
             modal.show();
         }
 
+        function clearErrors() {
+            ['id', 'code', 'amount', 'date'].forEach(field => {
+                const errorDiv = document.getElementById('error-' + field);
+                if (errorDiv) errorDiv.innerText = '';
+            });
+        }
+
         document.getElementById('editForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-
+            clearErrors();
             const formData = new FormData(this);
             const data = {
                 id: formData.get('id'),
@@ -99,7 +107,6 @@
                 amount: formData.get('amount'),
                 date: new Date(formData.get('date')).toISOString()
             };
-
             const confirm = await Swal.fire({
                 title: '¿Estás seguro?',
                 text: '¿Deseas enviar los cambios?',
@@ -129,22 +136,31 @@
 
                 const result = await response.json();
 
-                Swal.fire({
-                    icon: result.status === 200 ? 'success' : 'error',
-                    title: result.status === 200 ? 'Actualizado' : 'Error',
-                    text: result.status === 200 ? 'Datos enviados correctamente.' : 'No se pudo enviar.'
-                });
-
-                if (result.status === 200) {
-                    modal.hide();
-                    setTimeout(() => window.location.reload(), 1000);
+                if (response.status === 422) {
+                    const errors = result.errors;
+                    for (const field in errors) {
+                        const errorDiv = document.getElementById('error-' + field);
+                        if (errorDiv) errorDiv.innerText = errors[field][0];
+                    }
+                    Swal.close();
+                    return;
                 }
-
+                if (!response.ok) {
+                    throw new Error(result.message || 'Error inesperado.');
+                }
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Actualizado',
+                    text: 'Datos enviados correctamente.'
+                }).then(() => {
+                    modal.hide();
+                    window.location.reload();
+                });
             } catch (err) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'Error de red o del servidor.'
+                    text: err.message || 'Error desconocido.'
                 });
             }
         });

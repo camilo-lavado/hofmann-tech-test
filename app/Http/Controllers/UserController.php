@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\HofmannApiService;
-use Illuminate\Http\Request;
+use App\Http\Requests\SendUserRequest;
 
 class UserController extends Controller
 {
@@ -11,17 +11,29 @@ class UserController extends Controller
     {
         $users = $hofmann->getTableUsers();
         $codes = $hofmann->getCodes();
-
         return view('users', compact('users', 'codes'));
     }
 
-    public function send(Request $request, HofmannApiService $hofmann)
+    public function send(SendUserRequest $request, HofmannApiService $hofmann)
     {
-        $data = $request->only(['id', 'code', 'amount', 'date']);
-        $data['github'] = 'https://github.com/camilo-lavado';
+        $validated = $request->validated();
+        $validated['github'] = 'https://github.com/camilo-lavado';
 
-        $status = $hofmann->sendUser($data);
-
-        return response()->json(['status' => $status]);
+        try {
+            $status = $hofmann->sendUser($validated);
+            if ($status === 200) {
+                return response()->json(['status' => 200]);
+            }
+            return response()->json([
+                'status' => $status,
+                'message' => 'Error desde la API externa.'
+            ], 500);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error de conexión con la API externa.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
