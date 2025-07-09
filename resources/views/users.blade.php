@@ -5,6 +5,13 @@
     <meta charset="UTF-8">
     <title>Usuarios Hofmann</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        table tbody tr:hover {
+            background-color: #f1f1f1;
+            transition: background-color 0.2s ease-in-out;
+        }
+    </style>
 </head>
 
 <body class="bg-light p-4">
@@ -28,9 +35,8 @@
                     <td>${{ number_format($user['amount'], 0, ',', '.') }}</td>
                     <td>{{ \Carbon\Carbon::parse($user['date'])->format('d-m-Y') }}</td>
                     <td>
-                        <button class="btn btn-sm btn-primary"
-                            onclick="openModal({{ json_encode($user) }})">
-                            Editar
+                        <button class="btn btn-sm btn-primary" onclick="openModal({{ json_encode($user) }})">
+                            <i class="bi bi-pencil-square me-1"></i> Editar
                         </button>
                     </td>
                 </tr>
