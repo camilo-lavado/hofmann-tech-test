@@ -18,7 +18,7 @@ class UserController extends Controller
     public function send(Request $request, HofmannApiService $hofmann)
     {
         $data = $request->only(['id', 'code', 'amount', 'date']);
-        $data['github'] = 'https://github.com/camilo-lavado
+        $data['github'] = 'https://github.com/camilo-lavado';
 
         $status = $hofmann->sendUser($data);
 
