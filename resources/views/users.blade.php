@@ -3,15 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Usuarios Hofmann</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <style>
-        table tbody tr:hover {
-            background-color: #f1f1f1;
-            transition: background-color 0.2s ease-in-out;
-        }
-    </style>
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 
 <body class="bg-light p-4">
@@ -90,98 +87,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        let modal = new bootstrap.Modal(document.getElementById('editModal'));
-
-        function openModal(user) {
-            clearErrors();
-            document.getElementById('id').value = user.id;
-            document.getElementById('code').value = user.code;
-            document.getElementById('amount').value = Number(user.amount).toLocaleString('es-CL');
-            document.getElementById('date').value = user.date.split('T')[0];
-            modal.show();
-        }
-
-        function clearErrors() {
-            ['id', 'code', 'amount', 'date'].forEach(field => {
-                const errorDiv = document.getElementById('error-' + field);
-                if (errorDiv) errorDiv.innerText = '';
-            });
-        }
-
-        document.getElementById('amount').addEventListener('input', function() {
-            let value = this.value.replace(/\D/g, '');
-            this.value = Number(value).toLocaleString('es-CL');
-        });
-
-        document.getElementById('editForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            clearErrors();
-            const formData = new FormData(this);
-            const rawAmount = formData.get('amount').replace(/\./g, '').replace(/[^0-9]/g, '');
-            const data = {
-                id: formData.get('id'),
-                code: formData.get('code'),
-                amount: rawAmount,
-                date: new Date(formData.get('date')).toISOString()
-            };
-            const confirm = await Swal.fire({
-                title: '¿Estás seguro?',
-                text: '¿Deseas enviar los cambios?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, enviar',
-                cancelButtonText: 'Cancelar'
-            });
-
-            if (!confirm.isConfirmed) return;
-
-            Swal.fire({
-                title: 'Enviando...',
-                didOpen: () => Swal.showLoading(),
-                allowOutsideClick: false
-            });
-
-            try {
-                const response = await fetch('{{ route("send-user") }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                if (response.status === 422) {
-                    const errors = result.errors;
-                    for (const field in errors) {
-                        const errorDiv = document.getElementById('error-' + field);
-                        if (errorDiv) errorDiv.innerText = errors[field][0];
-                    }
-                    Swal.close();
-                    return;
-                }
-                if (!response.ok) {
-                    throw new Error(result.message || 'Error inesperado.');
-                }
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Actualizado',
-                    text: 'Datos enviados correctamente.'
-                }).then(() => {
-                    modal.hide();
-                    window.location.reload();
-                });
-            } catch (err) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: err.message || 'Error desconocido.'
-                });
-            }
-        });
+        window.sendUserUrl = "{{ route('send-user') }}";
+        window.csrfToken = "{{ csrf_token() }}";
     </script>
+    <script src="{{ asset('js/app.js') }}"></script>
+
 </body>
 
 </html>
