@@ -1,61 +1,54 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Hofmann Tech Test
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Prueba técnica desarrollada con Laravel 12 que consume una API externa de Droguería Hofmann.  
+Incluye un sistema de edición visual en modal y validaciones.
 
-## About Laravel
+## Tecnologías utilizadas
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Laravel 12.x
+- Bootstrap 5.3 + Bootstrap Icons
+- SweetAlert2
+- Js (ES6)
+- API externa Hofmann (documentada vía Swagger)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Funcionalidades
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Listado inicial con datos de la API `/ListTableUsers`
+- Edición en modal con:
+  - Selector desplegable de código desde `/GetUsers`
+  - Validaciones de monto y fecha
+  - Confirmación visual antes de enviar
+  - Envío con `POST /SendUser`
+- Mensajes visuales (errores y éxito)
+- Recarga automática tras envío
 
-## Learning Laravel
+## Estructura relevante
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- `routes/web.php`: Definición de rutas (`/`, `POST /send`)
+- `app/Http/Controllers/UserController.php`: Lógica de consumo API y validación
+- `resources/views/usuarios.blade.php`: Vista principal con tabla y modal
+- `public/js/app.js`: Lógica JS del modal y validaciones
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Instrucciones para ejecutar
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+git clone https://github.com/camilo-lavado/hofmann-tech-test.git
+cd hofmann-tech-test
+composer install
+php artisan serve
+```
 
-## Laravel Sponsors
+Abre [http://127.0.0.1:8000](http://127.0.0.1:8000) en tu navegador.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**No requiere base de datos ni archivo `.env`.**
 
-### Premium Partners
+## Ejemplo visual
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+| Tabla de usuarios | Modal de edición |
+|-------------------|------------------|
+| ![Tabla](https://raw.githubusercontent.com/camilo-lavado/hofmann-tech-test/main/public/img/demo1.png) | ![Modal](https://raw.githubusercontent.com/camilo-lavado/hofmann-tech-test/main/public/img/demo2.png) |
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Desarrollado por [**Camilo Lavado**](https://github.com/camilo-lavado)  
+<camilolavado.it@gmail.com>
